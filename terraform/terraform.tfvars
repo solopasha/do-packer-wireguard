@@ -1,0 +1,5 @@
+#do_api_token = ""
+droplet_name = "fed10"
+region_name  = "ams3"
+sshkey_name  = "wsl"
+pvt_key      = "~/.ssh/digitalo"

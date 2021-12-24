@@ -1,0 +1,21 @@
+name: Docker
+
+on:
+  push:
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - 'master'
+
+jobs:
+  build:
+    if: success()
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run tests
+        run: docker build ./ -t ${GITHUB_BASE_REF}
+        

@@ -1,0 +1,27 @@
+{
+  "variables": {
+    "do_api_token": "{{env `TF_VAR_do_api_token`}}"
+  },
+  "builders": [
+    {
+      "droplet_name": "fed10",
+      "snapshot_name": "fed10",
+      "type": "digitalocean",
+      "ssh_username": "root",
+      "api_token": "{{ user `do_api_token` }}",
+      "image": "rockylinux-8-x64",
+      "region": "ams3",
+      "size": "s-1vcpu-1gb"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "configs/install.sh"
+    },
+    {
+      "type": "ansible",
+      "playbook_file": "../ansible/roles/playbook.yml"
+    }
+  ]
+}

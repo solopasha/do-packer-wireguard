@@ -1,0 +1,14 @@
+[Interface]
+Address = 10.0.0.1/32
+PrivateKey = {{ wg_privatekey['content'] | b64decode | replace('\n', '')}}
+ListenPort = {{ wg_listen_port }}
+PostUp = firewall-cmd --add-masquerade && firewall-cmd --add-port {{ wg_listen_port }}/udp && firewall-cmd --add-rich-rule='rule family=ipv4 source address=10.0.0.0/32 masquerade'
+PostDown = firewall-cmd --remove-masquerade && firewall-cmd --remove-port {{ wg_listen_port }}/udp && firewall-cmd --remove-rich-rule='rule family=ipv4 source address=10.0.0.0/32 masquerade'
+{% for item in wg_user_publickey.results %}
+{% if item.item.value.remove == False %}
+[Peer]
+PublicKey = {{ item['content'] | b64decode | replace('\n', '') }}
+AllowedIps = {{ item.item.value.private_ip }}/32
+
+{% endif %}
+{% endfor %}
