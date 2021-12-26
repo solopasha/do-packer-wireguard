@@ -34,9 +34,9 @@ data "digitalocean_droplet_snapshot" "web-snapshot" {
 ## Create a new droplet from an existing image
 resource "digitalocean_droplet" "web" {
   image = data.digitalocean_droplet_snapshot.web-snapshot.id
-  count = 1
-  name  = "${var.droplet_name}-${count.index}"
-  #name     = var.droplet_name
+  #count = 1
+  #name = "${var.droplet_name}-${count.index}"
+  name     = var.droplet_name
   region   = var.region_name
   size     = "s-1vcpu-1gb"
   ipv6     = true
@@ -70,6 +70,73 @@ resource "digitalocean_droplet" "web" {
   }
 }
 
+resource "digitalocean_firewall" "web" {
+  name = "only-22-80-443-and-wg"
+
+  droplet_ids = [digitalocean_droplet.web.id]
+
+  inbound_rule {
+    protocol         = "tcp"
+    port_range       = "22"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  inbound_rule {
+    protocol         = "tcp"
+    port_range       = "80"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  inbound_rule {
+    protocol         = "tcp"
+    port_range       = "443"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  inbound_rule {
+    protocol         = "icmp"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  inbound_rule {
+    protocol         = "udp"
+    port_range       = "51820"
+    source_addresses = ["0.0.0.0/0", "::/0"]
+  }
+  outbound_rule {
+    protocol              = "tcp"
+    port_range            = "80"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "tcp"
+    port_range            = "443"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+  outbound_rule {
+    protocol              = "tcp"
+    port_range            = "53"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "udp"
+    port_range            = "53"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "icmp"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+
+  outbound_rule {
+    protocol              = "udp"
+    port_range            = "51820"
+    destination_addresses = ["0.0.0.0/0", "::/0"]
+  }
+}
 ## out info
 output "droplet_ip_address" {
   value = digitalocean_droplet.web[*].ipv4_address
